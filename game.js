@@ -22,6 +22,7 @@ for(const [key, value] of Object.entries(texturesPath)) {
     texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
     textureDict[key] = texture
 }
+delete texturesPath
 
 // Keyboard input
 // Reused from Src: https://github.com/TheReal3rd/ResenforGame/blob/main/game.js
@@ -85,6 +86,7 @@ const calcAngularPosition = (posX, posY, angle, distance) => {
 }
 
 const BULLET_SIZE = 9;
+const PLAYER_TEAM = 0;
 
 let bulletID = 0;
 let enemyID = 0;
@@ -111,7 +113,21 @@ playerObj.y = app.screen.height / 2;
 app.stage.addChild(playerObj);
 
 function spawnEnemy(x, y, enemyType, strengthLevel) {
-    const enemyObj = new PIXI.Sprite(textureDict["enemy2"]);
+    let textureName = "enemy1";
+    let health = 100;
+    let spinDir = NaN;
+    switch(enemyType) {
+        case 1:
+            textureName = "enemy2";
+            spinDir = getRandInt(0, 1) == 1 ? -1 : 1; 
+            break;
+
+        case 2:
+            textureName = "enemy3";
+            break;
+    }
+
+    const enemyObj = new PIXI.Sprite(textureDict[textureName]);
     enemyObj.anchor.set(0.5);
     enemyObj.scale.set(-2, 2);
     enemyObj.tint = 0xff0000;
@@ -119,12 +135,49 @@ function spawnEnemy(x, y, enemyType, strengthLevel) {
     enemyObj.x = x;
     enemyObj.y = y;
     app.stage.addChild(enemyObj);
-    const health = 100;
-    enemyDict[enemyID] = [enemyObj, enemyType, strengthLevel, health];
+
+    enemyDataDict = {
+        "object" : enemyObj, 
+        "type" : enemyType, 
+        "strength" : strengthLevel, 
+        "health" : health
+    }
+
+    if (spinDir != NaN) {
+        enemyDataDict["spinDir"] = spinDir;
+    }
+    
+    enemyDict[enemyID] = enemyDataDict;
     enemyID += 1;
 }
 
 spawnEnemy(app.screen.width / 2, app.screen.height / 2, 0, 0);
+
+function enemyUpdate() {
+    let removeList = []
+    for(const [key, value] of Object.entries(enemyDict)) {
+        const obj = value["object"];
+        const type = value["type"];
+        const strength = value["strength"];
+        const health = value["health"];
+
+        switch(type) {
+            case 1:
+                const spinDir = value["spinDir"];
+                obj.angle += 4 * spinDir;
+                break;
+        }
+
+        if (health <= 0) {
+            removeList.push(key);
+        }
+    }
+    if(removeList.length != 0) {
+        for(const key of removeList) {
+            delete enemyDict[key];
+        }
+    }
+}
 
 function shootSpiral(x, y, speed, angleOffset, amount, radius, bulletType, teamID) {
     for(let angle = 0; angle != 360; angle += 360 / amount) {
@@ -198,12 +251,14 @@ function shootProjectile(x ,y, vx, vy, teamID, bulletType) {
     let textureName = "bullet1";
     let scale = -1.5;
     let projAngle = 0;
+    let spinDir = NaN;
     const predX = (x + vx);
     const predY = (y + vy);
     const predAngle = calcAngle(x, y, predX, predY);
     switch (bulletType) {
         case 1: //Spinning style projectile... Deals 2 hearts of damage.
             textureName = "bullet2";
+            spinDir = getRandInt(0, 1) == 1 ? -1 : 1;
             break;
         case 2: //Health steal projectile... Steal health from target and give to sender.
             textureName = "bullet3";
@@ -212,6 +267,7 @@ function shootProjectile(x ,y, vx, vy, teamID, bulletType) {
             break;
         case 3: //Flower projectile spins... Wavy movement.
             textureName = "bullet4";
+            spinDir = getRandInt(0, 1) == 1 ? -1 : 1;
             break;
         case 4: //Homing missles.
             textureName = "bullet5";
@@ -223,32 +279,43 @@ function shootProjectile(x ,y, vx, vy, teamID, bulletType) {
     projTemp.scale.set(scale, scale);
     projTemp.tint = 0xff0000;
     projTemp.angle = projAngle;
-
     projTemp.x = x;
     projTemp.y = y;
     app.stage.addChild(projTemp);
-    projDict[bulletID] = [projTemp, vx, vy, teamID, bulletType];
+
+    projDataDict = { 
+        "object" : projTemp, 
+        "velx" : vx, 
+        "vely" :  vy, 
+        "team" : teamID, 
+        "type" : bulletType
+    };
+    if (spinDir != NaN) {
+        projDataDict["spinDir"] = spinDir;
+    }
+
+    projDict[bulletID] = projDataDict;
     bulletID += 1;
 }
 
 function updateProjectiles(elapsed) {
     let removeList = []
     for(const [key, value] of Object.entries(projDict)) {
-        let obj = value[0];
-        let vx = value[1];
-        let vy = value[2];
-        let teamID = value[3];
-        let bulletType = value[4];
+        let obj = value["object"];
+        let vx = value["velx"];
+        let vy = value["vely"];
+        let teamID = value["team"];
+        let bulletType = value["type"];
 
         switch (bulletType) {
             case 1:
-                obj.angle += 6.5;
+                obj.angle += 6.5 * value["spinDir"];
                 break;
             case 2:
                 // TODO Add health stealing + shooter.
                 break;
             case 3:
-                obj.angle += 15;
+                obj.angle += 15 * value["spinDir"];
                 const tempElapsed = elapsed / 6
                 obj.x += Math.cos(obj.y * (tempElapsed)) * (tempElapsed);
                 obj.y += Math.sin(obj.x * (tempElapsed)) * (tempElapsed);
@@ -296,16 +363,23 @@ function updatePlayer() {
         playerObj.y += playerSpeed;
     }
 
+
     if(Date.now() - pShootDelay > 240) {
         if(keys.space) {
-            shootProjectile(playerObj.x, playerObj.y, 10, 0, 0, 3);
+            const bulletType = 0;
+            shootProjectile(playerObj.x, playerObj.y, 10, 0, PLAYER_TEAM, bulletType);
             pShootDelay = Date.now();
         }
     }
 
     if(Date.now() - pSpecialDelay > 1000) {
         if(keys.q) {
-            shootProjectile(playerObj.x, playerObj.y, 10, 0, 0, 1);
+            const bulletType = 4;
+            const attackType = 2;
+            const amount = 4;
+            const angle = 0;
+            const speed = 4;
+            shootPattern(playerObj.x, playerObj.y, speed, angle, amount, attackType, bulletType, PLAYER_TEAM);
             pSpecialDelay = Date.now();
         }
     }
@@ -319,5 +393,6 @@ app.ticker.add(() => {
 
     updateProjectiles(deltaTime);
     updatePlayer();
+    enemyUpdate();
 });
 
