@@ -10,6 +10,9 @@ texturesPath = {
     "bullet3" : "/assets/bullets/bullet3.png",
     "bullet4" : "/assets/bullets/bullet4.png",
     "bullet5" : "/assets/bullets/bullet5.png",
+    "enemy1" : "/assets/spaceShips/ship2.png",
+    "enemy2" : "/assets/spaceShips/ship3.png",
+    "enemy3" : "/assets/spaceShips/ship4.png",
 };
 textureDict = {};
 
@@ -108,8 +111,20 @@ playerObj.y = app.screen.height / 2;
 app.stage.addChild(playerObj);
 
 function spawnEnemy(x, y, enemyType, strengthLevel) {
-    
+    const enemyObj = new PIXI.Sprite(textureDict["enemy2"]);
+    enemyObj.anchor.set(0.5);
+    enemyObj.scale.set(-2, 2);
+    enemyObj.tint = 0xff0000;
+    enemyObj.angle = 90;
+    enemyObj.x = x;
+    enemyObj.y = y;
+    app.stage.addChild(enemyObj);
+    const health = 100;
+    enemyDict[enemyID] = [enemyObj, enemyType, strengthLevel, health];
+    enemyID += 1;
 }
+
+spawnEnemy(app.screen.width / 2, app.screen.height / 2, 0, 0);
 
 function shootSpiral(x, y, speed, angleOffset, amount, radius, bulletType, teamID) {
     for(let angle = 0; angle != 360; angle += 360 / amount) {
