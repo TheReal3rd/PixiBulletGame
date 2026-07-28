@@ -4,15 +4,15 @@
 console.log("Game running");
 
 texturesPath = { 
-    "player" : "/assets/spaceShips/ship1.png",
-    "bullet1" : "/assets/bullets/bullet1.png",
-    "bullet2" : "/assets/bullets/bullet2.png",
-    "bullet3" : "/assets/bullets/bullet3.png",
-    "bullet4" : "/assets/bullets/bullet4.png",
-    "bullet5" : "/assets/bullets/bullet5.png",
-    "enemy1" : "/assets/spaceShips/ship2.png",
-    "enemy2" : "/assets/spaceShips/ship3.png",
-    "enemy3" : "/assets/spaceShips/ship4.png",
+    "player" : "https://simple.rip/assets/spaceShips/ship1.png",
+    "bullet1" : "https://simple.rip/assets/bullets/bullet1.png",
+    "bullet2" : "https://simple.rip/assets/bullets/bullet2.png",
+    "bullet3" : "https://simple.rip/assets/bullets/bullet3.png",
+    "bullet4" : "https://simple.rip/assets/bullets/bullet4.png",
+    "bullet5" : "https://simple.rip/assets/bullets/bullet5.png",
+    "enemy1" : "https://simple.rip/assets/spaceShips/ship2.png",
+    "enemy2" : "https://simple.rip/assets/spaceShips/ship3.png",
+    "enemy3" : "https://simple.rip/assets/spaceShips/ship4.png",
 };
 textureDict = {};
 
@@ -40,6 +40,21 @@ const keys = {
     r: false,
     q: false,
 };
+
+//Consts ID's
+const NORMAL_BULLET_ID = 0;
+const SPIN_STAR_BULLET_ID = 1;
+const HEART_SHAPED_BULLET_ID = 2;
+const SPORES_BULLET_ID = 3;
+const HOMING_BULLET_ID = 4;
+
+const SPIRAL_PATTERN_ID = 0;
+const STAR_PATTERN_ID = 1;
+const WALL_PATTERN_ID = 2;
+
+const GRUNT_SHIP_ID = 0;
+const GRUNT_SPIN_ENEMY_ID = 1;
+const GRUNT_HEAVY_SHIP_ENEMY_ID = 2;
 
 window.addEventListener('keydown', (e) => {
     const key = e.key.toLowerCase();
@@ -112,18 +127,25 @@ playerObj.x = 25;
 playerObj.y = app.screen.height / 2;
 app.stage.addChild(playerObj);
 
-function spawnEnemy(x, y, enemyType, strengthLevel) {
+function spawnEnemy(x, y, enemyType, strengthLevel, rotation=0) {
     let textureName = "enemy1";
-    let health = 100;
+    let health = 0;
+    let maxShootDelay = 0;
     let spinDir = NaN;
     switch(enemyType) {
-        case 1:
+        case GRUNT_SPIN_ENEMY_ID:
             textureName = "enemy2";
             spinDir = getRandInt(0, 1) == 1 ? -1 : 1; 
             break;
 
-        case 2:
+        case GRUNT_HEAVY_SHIP_ENEMY_ID:
             textureName = "enemy3";
+            health = 40 * (strengthLevel < 1 ? 2 : strengthLevel);
+            maxShootDelay = 250;
+            break;
+        default:
+            health = 20 * (strengthLevel < 1 ? 2 : strengthLevel);
+            maxShootDelay = 400;
             break;
     }
 
@@ -131,7 +153,7 @@ function spawnEnemy(x, y, enemyType, strengthLevel) {
     enemyObj.anchor.set(0.5);
     enemyObj.scale.set(-2, 2);
     enemyObj.tint = 0xff0000;
-    enemyObj.angle = 90;
+    enemyObj.angle = rotation;
     enemyObj.x = x;
     enemyObj.y = y;
     app.stage.addChild(enemyObj);
@@ -140,7 +162,9 @@ function spawnEnemy(x, y, enemyType, strengthLevel) {
         "object" : enemyObj, 
         "type" : enemyType, 
         "strength" : strengthLevel, 
-        "health" : health
+        "health" : health,
+        "shootDelay" : 0,
+        "maxShootDelay" : maxShootDelay,
     }
 
     if (spinDir != NaN) {
@@ -151,7 +175,11 @@ function spawnEnemy(x, y, enemyType, strengthLevel) {
     enemyID += 1;
 }
 
-spawnEnemy(app.screen.width / 2, app.screen.height / 2, 0, 0);
+let yOffset = 0
+for(let x = 0;x != 5;x++) {
+    spawnEnemy(app.screen.width / 2, app.screen.height / 2 + yOffset, 2, 0, rotation = -90);
+    yOffset += 30
+}
 
 function enemyUpdate() {
     let removeList = []
@@ -160,9 +188,12 @@ function enemyUpdate() {
         const type = value["type"];
         const strength = value["strength"];
         const health = value["health"];
+        const shootDelay = value["shootDelay"];
+        const maxShootDelay = value["maxShootDelay"];
+
 
         switch(type) {
-            case 1:
+            case GRUNT_SPIN_ENEMY_ID:
                 const spinDir = value["spinDir"];
                 obj.angle += 4 * spinDir;
                 break;
@@ -170,6 +201,7 @@ function enemyUpdate() {
 
         if (health <= 0) {
             removeList.push(key);
+            app.stage.removeChild(obj);
         }
     }
     if(removeList.length != 0) {
@@ -200,7 +232,7 @@ for(let x = 0; x != 6; x++) {
 
 function shootPattern(x, y, speed, angle, amount, attackType, bulletType, teamID) {
     switch(attackType) {
-        case 0: // Spiral Wall shot
+        case SPIRAL_PATTERN_ID: // Spiral Wall shot
             for(let x1 = -(amount / 2); x1 != amount / 2; x1++) {
                 const sin = Math.sin(toRadians(angle + (x1 * BULLET_SIZE)));
                 const cos = Math.cos(toRadians(angle + (x1 * BULLET_SIZE)));
@@ -211,7 +243,7 @@ function shootPattern(x, y, speed, angle, amount, attackType, bulletType, teamID
                 shootProjectile(posX, posY, vx, vy, teamID, bulletType);
             }
             break;
-        case 1: // Star wall shot. bascially an explosion of bullets. :3
+        case STAR_PATTERN_ID: // Star wall shot. bascially an explosion of bullets. :3
             const sin = Math.sin(toRadians(angle));
             const cos = Math.cos(toRadians(angle));
             const vx = cos * speed;
@@ -222,7 +254,7 @@ function shootPattern(x, y, speed, angle, amount, attackType, bulletType, teamID
                 shootProjectile(posX, posY, vx, vy, teamID, bulletType);
             }
             break;
-        case 2: // Wall shot
+        case WALL_PATTERN_ID: // Wall shot
             for(let x1 = -(amount / 2); x1 != amount / 2; x1++) {
                 const sin = Math.sin(toRadians(angle + (x1 * BULLET_SIZE)));
                 const cos = Math.cos(toRadians(angle + (x1 * BULLET_SIZE)));
@@ -246,7 +278,6 @@ for(let angle = 0; angle != 360; angle += 360 / 10) {
 }
 
 */
-
 function shootProjectile(x ,y, vx, vy, teamID, bulletType) {
     let textureName = "bullet1";
     let scale = -1.5;
@@ -256,20 +287,20 @@ function shootProjectile(x ,y, vx, vy, teamID, bulletType) {
     const predY = (y + vy);
     const predAngle = calcAngle(x, y, predX, predY);
     switch (bulletType) {
-        case 1: //Spinning style projectile... Deals 2 hearts of damage.
+        case SPIN_STAR_BULLET_ID: //Spinning style projectile... Deals 2 hearts of damage.
             textureName = "bullet2";
             spinDir = getRandInt(0, 1) == 1 ? -1 : 1;
             break;
-        case 2: //Health steal projectile... Steal health from target and give to sender.
+        case HEART_SHAPED_BULLET_ID: //Health steal projectile... Steal health from target and give to sender.
             textureName = "bullet3";
             scale = -2;
             projAngle = predAngle + 90;
             break;
-        case 3: //Flower projectile spins... Wavy movement.
+        case SPORES_BULLET_ID: //Flower projectile spins... Wavy movement.
             textureName = "bullet4";
             spinDir = getRandInt(0, 1) == 1 ? -1 : 1;
             break;
-        case 4: //Homing missles.
+        case HOMING_BULLET_ID: //Homing missles.
             textureName = "bullet5";
             projAngle = predAngle + 90;
             break;
@@ -307,14 +338,27 @@ function updateProjectiles(elapsed) {
         let teamID = value["team"];
         let bulletType = value["type"];
 
+        let homingTarget = NaN;
+
+        for(const [eneKey, eneValue] of Object.entries(enemyDict)) {
+            let projObj = eneValue["object"];
+            let distance = calcDistance(obj.x, obj.y, projObj.x, projObj.y);
+
+            if(distance <= 20) {
+                removeList.push(key);
+                app.stage.removeChild(obj);
+                eneValue["health"] = eneValue["health"] - 20;
+            }
+        }
+
         switch (bulletType) {
-            case 1:
+            case SPIN_STAR_BULLET_ID:
                 obj.angle += 6.5 * value["spinDir"];
                 break;
-            case 2:
+            case HEART_SHAPED_BULLET_ID:
                 // TODO Add health stealing + shooter.
                 break;
-            case 3:
+            case SPORES_BULLET_ID:
                 obj.angle += 15 * value["spinDir"];
                 const tempElapsed = elapsed / 6
                 obj.x += Math.cos(obj.y * (tempElapsed)) * (tempElapsed);
@@ -322,7 +366,7 @@ function updateProjectiles(elapsed) {
                 obj.x += vx
                 obj.y += vy
                 break;
-            case 4:
+            case HOMING_BULLET_ID:
                 // TODO Homing code here.
                 break;
         }
@@ -366,7 +410,7 @@ function updatePlayer() {
 
     if(Date.now() - pShootDelay > 240) {
         if(keys.space) {
-            const bulletType = 0;
+            const bulletType = NORMAL_BULLET_ID;
             shootProjectile(playerObj.x, playerObj.y, 10, 0, PLAYER_TEAM, bulletType);
             pShootDelay = Date.now();
         }
@@ -374,7 +418,7 @@ function updatePlayer() {
 
     if(Date.now() - pSpecialDelay > 1000) {
         if(keys.q) {
-            const bulletType = 4;
+            const bulletType = HOMING_BULLET_ID;
             const attackType = 2;
             const amount = 4;
             const angle = 0;
@@ -395,4 +439,3 @@ app.ticker.add(() => {
     updatePlayer();
     enemyUpdate();
 });
-
