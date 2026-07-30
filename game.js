@@ -56,6 +56,9 @@ const GRUNT_SHIP_ID = 0;
 const GRUNT_SPIN_ENEMY_ID = 1;
 const GRUNT_HEAVY_SHIP_ENEMY_ID = 2;
 
+const PLAYER_TEAM = 0;
+const ENEMY_TEAM = 1;
+
 window.addEventListener('keydown', (e) => {
     const key = e.key.toLowerCase();
     if (e.code === 'Space') keys.space = true;
@@ -72,6 +75,14 @@ window.addEventListener('keyup', (e) => {
 // Src for these functions: https://github.com/TheReal3rd/PixelUtilsArcade/blob/master/custom.ts
 const getRandInt = (min, max) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+const clamp = (value, minValue, maxValue) => {
+    return Math.max(minValue, Math.min(value, maxValue));
+}
+
+const axisDistance = (point, point2) => {
+    return Math.abs(point - point2);
 }
 
 const calcDistance = (posX, posY, posX1, posY1) => {
@@ -101,7 +112,7 @@ const calcAngularPosition = (posX, posY, angle, distance) => {
 }
 
 const BULLET_SIZE = 9;
-const PLAYER_TEAM = 0;
+const MOVE_CHECK_ATTEMPTS = 5;
 
 let bulletID = 0;
 let enemyID = 0;
@@ -135,7 +146,9 @@ function spawnEnemy(x, y, enemyType, strengthLevel, rotation=0) {
     switch(enemyType) {
         case GRUNT_SPIN_ENEMY_ID:
             textureName = "enemy2";
+            health = 10 * (strengthLevel < 1 ? 2 : strengthLevel);
             spinDir = getRandInt(0, 1) == 1 ? -1 : 1; 
+            maxShootDelay = 1200;
             break;
 
         case GRUNT_HEAVY_SHIP_ENEMY_ID:
@@ -163,8 +176,11 @@ function spawnEnemy(x, y, enemyType, strengthLevel, rotation=0) {
         "type" : enemyType, 
         "strength" : strengthLevel, 
         "health" : health,
-        "shootDelay" : 0,
+        "shootDelay" : Date.now(),
         "maxShootDelay" : maxShootDelay,
+        "waypointX" : -1,
+        "waypointY" : -1,
+        "moveDelay" : Date.now(),
     }
 
     if (spinDir != NaN) {
@@ -176,8 +192,8 @@ function spawnEnemy(x, y, enemyType, strengthLevel, rotation=0) {
 }
 
 let yOffset = 0
-for(let x = 0;x != 5;x++) {
-    spawnEnemy(app.screen.width / 2, app.screen.height / 2 + yOffset, 2, 0, rotation = -90);
+for(let x = 0;x != 2;x++) {
+    spawnEnemy(app.screen.width / 2, app.screen.height / 2 + yOffset, GRUNT_SPIN_ENEMY_ID, 0, rotation = -90);
     yOffset += 30
 }
 
@@ -190,12 +206,66 @@ function enemyUpdate() {
         const health = value["health"];
         const shootDelay = value["shootDelay"];
         const maxShootDelay = value["maxShootDelay"];
+        const wpX = value["waypointX"];
+        const wpY = value["waypointY"];
+        const moveDelay = value["moveDelay"];
 
+        const MIN_DIST_TO_PLAYER = 45;
+        const MIN_DIST_TO_POINT = 30;
+        const MOVE_SPEED = 2;
+        const MOVE_WAIT = 3500
 
         switch(type) {
             case GRUNT_SPIN_ENEMY_ID:
                 const spinDir = value["spinDir"];
                 obj.angle += 4 * spinDir;
+
+                let newPoint = (wpX == -1 && wpY == -1) || Math.abs(calcDistance(obj.x, obj.y, wpX, wpY)) <= 1;
+                if (newPoint) {
+                    if(Date.now() - moveDelay >= MOVE_WAIT){
+                        value["moveDelay"] = Date.now();
+                        for(let attempts = MOVE_CHECK_ATTEMPTS; attempts != 0; attempts--) {
+                            randX = getRandInt(0, app.screen.width);
+                            randY = getRandInt(0, app.screen.height);
+
+                            let distanceToPlayer = Math.abs(calcDistance(randX, randY, playerObj.x, playerObj.y))
+                            if (distanceToPlayer <= MIN_DIST_TO_PLAYER) continue;
+
+                            let distanceToPoint = Math.abs(calcDistance(randX, randY, obj.x, obj.y))
+                            if (distanceToPoint <= MIN_DIST_TO_POINT) continue;
+
+                            value["waypointX"] = randX;
+                            value["waypointY"] = randY;
+                        }
+                    } 
+            
+                } else {
+
+                    if(Date.now() - shootDelay >= maxShootDelay) {
+                        value["shootDelay"] = Date.now();
+                        shootSpiral(obj.x, obj.y, 2, obj.angle, 15, 15, SPORES_BULLET_ID, ENEMY_TEAM)
+                    }
+
+                    let velX = 0;
+                    let velY = 0;
+                    let xSpeed = clamp(axisDistance(obj.x, wpX), 0.0, MOVE_SPEED);
+                    let ySpeed = clamp(axisDistance(obj.x, wpY), 0.0, MOVE_SPEED);
+                    if(obj.x < wpX) {
+                        velX = xSpeed;
+                    } else if (obj.x > wpX) {
+                        velX = (xSpeed * -1);
+                    }
+                    
+                    if(obj.y < wpY) {
+                        velY = ySpeed;
+                    } else if (obj.y > wpY) {
+                        velY = (ySpeed * -1);
+                    }
+
+                    obj.x += velX;
+                    obj.y += velY;
+                }
+
                 break;
         }
 
@@ -339,16 +409,19 @@ function updateProjectiles(elapsed) {
         let bulletType = value["type"];
 
         let homingTarget = NaN;
+        if(teamID == PLAYER_TEAM) {
+            for(const [eneKey, eneValue] of Object.entries(enemyDict)) {
+                let projObj = eneValue["object"];
+                let distance = calcDistance(obj.x, obj.y, projObj.x, projObj.y);
 
-        for(const [eneKey, eneValue] of Object.entries(enemyDict)) {
-            let projObj = eneValue["object"];
-            let distance = calcDistance(obj.x, obj.y, projObj.x, projObj.y);
-
-            if(distance <= 20) {
-                removeList.push(key);
-                app.stage.removeChild(obj);
-                eneValue["health"] = eneValue["health"] - 20;
+                if(distance <= 20) {
+                    removeList.push(key);
+                    app.stage.removeChild(obj);
+                    eneValue["health"] = eneValue["health"] - 20;
+                }
             }
+        } else {
+
         }
 
         switch (bulletType) {
