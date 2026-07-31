@@ -3,26 +3,40 @@
 
 console.log("Game running");
 
-texturesPath = { 
-    "player" : "https://simple.rip/assets/spaceShips/ship1.png",
-    "bullet1" : "https://simple.rip/assets/bullets/bullet1.png",
-    "bullet2" : "https://simple.rip/assets/bullets/bullet2.png",
-    "bullet3" : "https://simple.rip/assets/bullets/bullet3.png",
-    "bullet4" : "https://simple.rip/assets/bullets/bullet4.png",
-    "bullet5" : "https://simple.rip/assets/bullets/bullet5.png",
-    "enemy1" : "https://simple.rip/assets/spaceShips/ship2.png",
-    "enemy2" : "https://simple.rip/assets/spaceShips/ship3.png",
-    "enemy3" : "https://simple.rip/assets/spaceShips/ship4.png",
+/*Mostly done to allow export to work.
+However i found the true bug. Related to Async calls maybe reversed in the future.
+*/
+const ASSET_ATLAS = {
+  "player": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABw0lEQVR4AVST23msMAyER3QDW04wqSV7HtaUs8CpKJtalH9s70P0SdZtJMvGTCEpIhSChrYdRNay5rqWxCT5l2O4U9rKVDrAAmM5iIKb5aANJNwt1PFoJmAF6PgI46U+1o/ca1WtD5V1TVcEjZqBBgQ8NMm7uwejWHEKY2UtOQLOGtN1KDUCYHuSkxJr692KffZad83LomW5aWeK1VM0lBoFSFfQAJ/WMIY5FEzjfcHAhkVzvWABorwVBEcA8g7K9OdIyZ5qokHZdF9poylJ5whyLHlUX9x8W5QO0N32vleVwmUaSwzGCvEVBNlFEqEoaOpx719fut//YbIFuUQA4zcWUU9g1WWclgQ+/Hr96PX9etfIfUOduk4mYEeNjMd/PKpu80LEELoIwrzxRWqtvI9+jJFR/wrsaQZKIStNt60owtckbdsnwRR91BdJ5ARxiZITvqDKRfnbp6QEkEpFIGj78zLzMncV/o/IlCjsL1EU4EUGazY5nk+dx6njeeg4Dt6GkACYNmgpbL2PIF3nGXV/qHxuKmVjbEvRhr9t3S5oT3meV1DeeGI7DHz4PP+zSkyv67riAujYiWY4Et5oYGQK/QIAAP//GYOIgAAAAAZJREFUAwBoKMMcinh7GAAAAABJRU5ErkJggg==",
+  "bullet1": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAAXNSR0IArs4c6QAAAJtJREFUKFNNkNENwzAIRI/hAk47i5NZ4s6SyDjDUQFpZT4sEE/HnQlPCYsZ7JkIgGGM4Q3iYWHrXQPItcOEUgRDbyJmNu0Ko1wk5J0BliAxi2nvIXGeF1o7sG8b1vcLFFCZIUORFXWvaEdD1x6QzJCfu1zp07DXWSnOpaeMkIYsenuUBOTzwmwuPxt37J/ul1sW/yfnUsFLb42QXz38WSZ4295/AAAAAElFTkSuQmCC",
+  "bullet2": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAAXNSR0IArs4c6QAAAJ9JREFUKFN1kMERwzAIBI/igjxBKcVKLXEtlsfg4siAFP9yD31YFgQRAJ8PwfFgdrOLAMcIIcp3mNlVFaUUXGZ0YykBsO/dt+2DAS1obUV91ZCDAooRoWutQZ6CfhyIhoiZERVmP1XT5yAcvUNE0h6CGD1MhYMYJhH0Pk0EmFoymXunU1GWBe+2QmrNelLjBECOTujP735GLuym806z+QuZ+Vbc9032NQAAAABJRU5ErkJggg==",
+  "bullet3": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAABHNCSVQICAgIfAhkiAAAAIpJREFUGJVlkFEOgzAMQ18mrjb3NOthylVaJMrd8D4oDDR/RIqTOHFgIEaU5HgwNwQgJdt2kvwcHpBke/cJKfnWFCjpVrZrra61WulQnCS5r2sABtPacqnnTyaMX2C82wCtLZS5/E4eu6YzX1qjlJm+9cA453w3FSi9HYa198uMhsPt4P7/8bANfAEaAVV1jXWeBAAAAABJRU5ErkJggg==",
+  "bullet4": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAoklEQVR4AUxPMRKDMAyTeR+Zmo4lPI3QMd5yfV8qC2jRXRzFyJaYDH+Iq5w9ccMEIuc84pACI6rheetJBE0AW62S1LoNkdDzSOTNLaWZTy4a8X1gTgnuzvGB6ZooZbXXski48F5LoSCedmQCERbvfScDdt71tOZu6O8idO8fZTYCDNl7R35kGf3sQFwWhVbyUsGxKQK6NzMKuSQqGkNHHzB8AQAA//9wt4xDAAAABklEQVQDAP7aQBiz0G1PAAAAAElFTkSuQmCC",
+  "bullet5": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAe0lEQVR4AWRP2w3AIAg83NH0zzXKNi0z6H6Uh4m2vSCPg5NQCIblrPgaocCh6XxWbonKmXw6h7xrzCWirTWIxUkZSyghC4cNO/H6iUA+thySwFy3C/FHXrfzIVDMEJ28zlJm1mhY7uZ1rqNcF4RpR++oR0XvAw4+OXQPAAAA//9jB1rGAAAABklEQVQDACMKJqOFc58eAAAAAElFTkSuQmCC",
+  "enemy1": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAB30lEQVR4ATyTW3qrMAyER2zl0K/JfsJTIWcZYPLcmKyjZJ3qPyaNPt80Gl0sTCckmFJouFxSbwFtg+WNSZdhSKjyDBYChIx4zQi9JVIYGAntQCNsz4Zj8FBnSJDnUvLjX6+yLFk4Ax1euOOipSy5YDPH58OY6pI4Jnt+nk86Me3gObjcg0mY0Ol00uf5TD6nDTCpk8sKV5W6XidN1/9CbW4OYot1n22/TpOIIIuxjgKUPjUksFHTCwj2y0Bjw0ZCwXM+tgNg7YBbxmC93YrYZHEf+o9efd9rnpd0sIjQWlaSwIhjtiY6Yt0qHKNSrVX37zuT/V5V75zZW7X41W3jo9lLNDFAPIjuakq5sWFseJIt5apYVVYq1EvMB+QKLwDlQeTgc6Q9nA5SYvbkqIjQBkcEp1x5b00EF2ntQkNDrRdYaafYGMHdS7OjmHqcidwqoNmyRDhDdXzU1LquOK4EbaG01eoC1YIIgdkJJ3FA1bLMufDaHN7OkYEpqIi+QChLyZkZZEZtlXAFayE5EA7jOGocv8gqbXyZyp2TEice0Nc0HjQdgpfaZzS7zHPir/351M++y0zrTmPiDvbcf6zKb0SI7fwLkgnO5Ds+uKc77bOvIqQ+tvA7qfVvr3ZpwX4BAAD//zODemsAAAAGSURBVAMALPXjJdHevrsAAAAASUVORK5CYII=",
+  "enemy2": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAB3UlEQVR4AVxSwZGjMBDsUSreiwCIAvw6+2mnYREB3jBu/YR9GaIAZ+Bc5rolKLZWNcNIre7WIAgw/BqWID1jG33ftH26zozMAFJsBVTMXBCTGyQoUhJBnmAfjpAWclhzla2wI95aQfipNXGBZJkMnBRzomtyifPp7O/3G0rNxTY9JBSPVRF2Z0d2dpzOJ6+PNeq6QXNkNg1ONHQpeM5mxOn6CtxIpmxF4qY5oiorZsksUBQljerUldGFQcX2CmklL6RTjjytomBeFizK+cU6oyRWNzX+nk+eWzUW2zpwtLF1pz0fUIWDw3C5XgBDHukdjdzobbx5vEUPbYweW4pJsZW51cv1iq/HF3sVYmTkkHd3v9udGbpPTTq7d525Oy08s8h/PP7B0uVkKHfl+CRXiDrlj0SmNCzDMNg4TpiXOV1eWVQoqhJlVaR7mMYR3/1ApuQs1AX2x5UWTM5kMj0nCl6YX7zImbm8ME4T+u/eqMmNkKsI7FmVqS19YUc/9DY+Ryin6YlpfKLve/3l5DHSZbIyApPhu09uhCaDfXwccDj8oVht01xC7fOu1LmZ8TM6OLi5WaS1IF4Wb1l8ZRKoee7nNREaBS0kp4ShXSKMxOUJRJC8ibm+iDDOsY7/AAAA//96mfsFAAAABklEQVQDAC4O1Zj+irRFAAAAAElFTkSuQmCC",
+  "enemy3": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAB00lEQVR4ATSTy3HjMBBEe5CKtBGss/DeSJ6sjQVAJt4q7YnUyXZ849dDGcXBfLrnA0Bqeq4o7d2Cg1rXLbdtSwWOQ1YW24iwKcDOZ1/KU5GwLWsqEj+1rYsNpfc8yaXwW5EwXO0UO5bQHEMdUbGpBeFMxzYF1WSDaAKWnaKju5/zRCV7Co7yJIS5JAfSZIekwhzB96i9d4ZzINXnlFcYw8hwQlRKgyXikl3i20Z3vIjQ/X5H/p8w+MJdBJg8VRWRmgyTqJ+FPQcd0W9/33S73UA8xVDE2dXNnvlqZQSc50eeShyjE5+ytgrACgW7P+uWpkN4f/+XRhx0n0hcV0+oBAObkKyLK1hMxBFkUwZW3j4h4kgKjT405xAjSPgiYV14DXNo7CZNVDf48fllVUnyqrj0+udVEXQjNvsQw8rcxLc0KbSs3Dzz1eXJK2VQJIbCAR6LCJ3n6Pj8LvxaQFxiCp7GGDVp6OxWThaXYhiBDYajmgSbemICwc0666TI4MyjT2Cp0+33y4uCubsxpPOjsgQ1CYtXkI7HI/bjQPaS49jDhXyBY3YNCj2M73sc+xHG98dRo7agV1lUxGQc/guc73K56no95XL9pbp9n8JnMJc7s/sNAAD//zw5EYUAAAAGSURBVAMAyFXjwIHbI0MAAAAASUVORK5CYII="
 };
-textureDict = {};
 
-//Texture loading...
-for(const [key, value] of Object.entries(texturesPath)) {
-    let texture = PIXI.Assets.cache.get(value) || await PIXI.Assets.load(value);
-    texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-    textureDict[key] = texture
+async function loadTextureDictionary(atlas = ASSET_ATLAS) {
+  const bundle = {};
+  for (const [name, data] of Object.entries(atlas)) {
+    bundle[name] = typeof data === 'string'
+      ? data
+      : `data:${data.mime};base64,${data.base64}`;
+  }
+
+  PIXI.Assets.addBundle('packed-textures', bundle);
+  await PIXI.Assets.loadBundle('packed-textures');
+
+  const textures = {};
+  for (const name of Object.keys(bundle)) {
+    textures[name] = PIXI.Assets.get(name);
+  }
+  return textures;
 }
-delete texturesPath
+
+const textureDict = await loadTextureDictionary();
 
 // Keyboard input
 // Reused from Src: https://github.com/TheReal3rd/ResenforGame/blob/main/game.js
