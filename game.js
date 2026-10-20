@@ -200,8 +200,8 @@ function spawnEnemy(x, y, enemyType, strengthLevel, rotation=0) {
     enemyID += 1;
 }
 
-let yOffset = 0
-for(let x = 0;x != 2;x++) {
+let yOffset = -120
+for(let x = 0;x != 12;x++) {
     spawnEnemy(app.screen.width / 2, app.screen.height / 2 + yOffset, GRUNT_SPIN_ENEMY_ID, 0, rotation = -90);
     yOffset += 30
 }
@@ -255,26 +255,12 @@ function enemyUpdate() {
                         shootSpiral(obj.x, obj.y, 2, obj.angle, 15, 15, SPORES_BULLET_ID, ENEMY_TEAM)
                     }
 
-                    let velX = 0;
-                    let velY = 0;
-                    let xSpeed = clamp(axisDistance(obj.x, wpX), 0.0, MOVE_SPEED);
-                    let ySpeed = clamp(axisDistance(obj.x, wpY), 0.0, MOVE_SPEED);
-                    if(obj.x < wpX) {
-                        velX = xSpeed;
-                    } else if (obj.x > wpX) {
-                        velX = (xSpeed * -1);
-                    }
-                    
-                    if(obj.y < wpY) {
-                        velY = ySpeed;
-                    } else if (obj.y > wpY) {
-                        velY = (ySpeed * -1);
-                    }
-
-                    obj.x += velX;
-                    obj.y += velY;
+                    calcMoveDirection(obj, MOVE_SPEED, wpX, wpY);
                 }
 
+                break;
+            case GRUNT_SHIP_ID:
+                
                 break;
         }
 
@@ -288,6 +274,27 @@ function enemyUpdate() {
             delete enemyDict[key];
         }
     }
+}
+
+function calcMoveDirection(obj, moveSpeed, wpX, wpY) {
+    let velX = 0;
+    let velY = 0;
+    let xSpeed = clamp(axisDistance(obj.x, wpX), 0.0, moveSpeed);
+    let ySpeed = clamp(axisDistance(obj.y, wpY), 0.0, moveSpeed);
+    if(obj.x < wpX) {
+        velX = xSpeed;
+    } else if (obj.x > wpX) {
+        velX = (xSpeed * -1);
+    }
+    
+    if(obj.y < wpY) {
+        velY = ySpeed;
+    } else if (obj.y > wpY) {
+        velY = (ySpeed * -1);
+    }
+
+    obj.x += velX;
+    obj.y += velY;
 }
 
 function shootSpiral(x, y, speed, angleOffset, amount, radius, bulletType, teamID) {
