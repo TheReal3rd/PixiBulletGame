@@ -116,7 +116,7 @@ const toRadians = (degrees) => {
 }
 
 const toDegrees = (radians) => {
-    return radians * 57.29577951308232;
+    return radians * (180.0 / Math.PI);
 }
 
 const calcAngularPosition = (posX, posY, angle, distance) => {
