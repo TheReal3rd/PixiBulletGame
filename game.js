@@ -100,15 +100,11 @@ const axisDistance = (point, point2) => {
 }
 
 const calcDistance = (posX, posY, posX1, posY1) => {
-    const xDiff = posX - posX1;
-    const yDiff = posY - posY1;
-    return Math.hypot(xDiff, yDiff);
+    return Math.hypot(posX - posX1, posY - posY1);
 }
 
 const calcAngle = (posX, posY, posX1, posY1) => {
-    const xDiff = posX - posX1;
-    const yDiff = posY - posY1;
-    return toDegrees(Math.atan2(yDiff, xDiff));
+    return toDegrees(Math.atan2(posY - posY1, posX - posX1));
 }
 
 const toRadians = (degrees) => {
@@ -120,9 +116,7 @@ const toDegrees = (radians) => {
 }
 
 const calcAngularPosition = (posX, posY, angle, distance) => {
-    const sin = Math.sin(toRadians(angle));
-    const cos = Math.cos(toRadians(angle));
-    return [posX + (distance * cos), posY + (distance * sin)];
+    return [posX + (distance * Math.cos(toRadians(angle))), posY + (distance * Math.sin(toRadians(angle)))];
 }
 
 const BULLET_SIZE = 9;
@@ -170,6 +164,7 @@ function spawnEnemy(x, y, enemyType, strengthLevel, rotation=0) {
             health = 40 * (strengthLevel < 1 ? 2 : strengthLevel);
             maxShootDelay = 250;
             break;
+            
         default:
             health = 20 * (strengthLevel < 1 ? 2 : strengthLevel);
             maxShootDelay = 400;
@@ -327,7 +322,7 @@ function shootPattern(x, y, speed, angle, amount, attackType, bulletType, teamID
                 shootProjectile(posX, posY, vx, vy, teamID, bulletType);
             }
             break;
-        case STAR_PATTERN_ID: // Star wall shot. bascially an explosion of bullets. :3
+        case STAR_PATTERN_ID: // Star wall shot. basically an explosion of bullets. :3
             const sin = Math.sin(toRadians(angle));
             const cos = Math.cos(toRadians(angle));
             const vx = cos * speed;
@@ -362,6 +357,7 @@ for(let angle = 0; angle != 360; angle += 360 / 10) {
 }
 
 */
+
 function shootProjectile(x ,y, vx, vy, teamID, bulletType) {
     let textureName = "bullet1";
     let scale = -1.5;
