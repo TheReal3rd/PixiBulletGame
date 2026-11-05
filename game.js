@@ -121,6 +121,8 @@ const calcAngularPosition = (posX, posY, angle, distance) => {
 
 const BULLET_SIZE = 9;
 const MOVE_CHECK_ATTEMPTS = 5;
+const PLAYER_INVS_DURA = 500;
+const PLAYER_HITBOX_SIZE = 8;
 
 let bulletID = 0;
 let enemyID = 0;
@@ -438,7 +440,15 @@ function updateProjectiles(elapsed) {
                 }
             }
         } else {
-
+            let playerDist = calcDistance(playerObj.x, playerObj.y, obj.x, obj.y)
+            if(playerDist <= PLAYER_HITBOX_SIZE) {
+                if(Date.now() - pDamageDelay >= PLAYER_INVS_DURA) {
+                    pHealth -= 1;
+                }
+                
+                removeList.push(key);
+                app.stage.removeChild(obj);
+            }
         }
 
         switch (bulletType) {
@@ -497,7 +507,7 @@ function updatePlayer() {
         playerObj.y += playerSpeed;
     }
 
-
+    //TODO move these magic number into consts.
     if(Date.now() - pShootDelay > 240) {
         if(keys.space) {
             const bulletType = NORMAL_BULLET_ID;
