@@ -15,7 +15,8 @@ const ASSET_ATLAS = {
   "bullet5": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAe0lEQVR4AWRP2w3AIAg83NH0zzXKNi0z6H6Uh4m2vSCPg5NQCIblrPgaocCh6XxWbonKmXw6h7xrzCWirTWIxUkZSyghC4cNO/H6iUA+thySwFy3C/FHXrfzIVDMEJ28zlJm1mhY7uZ1rqNcF4RpR++oR0XvAw4+OXQPAAAA//9jB1rGAAAABklEQVQDACMKJqOFc58eAAAAAElFTkSuQmCC",
   "enemy1": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAB30lEQVR4ATyTW3qrMAyER2zl0K/JfsJTIWcZYPLcmKyjZJ3qPyaNPt80Gl0sTCckmFJouFxSbwFtg+WNSZdhSKjyDBYChIx4zQi9JVIYGAntQCNsz4Zj8FBnSJDnUvLjX6+yLFk4Ax1euOOipSy5YDPH58OY6pI4Jnt+nk86Me3gObjcg0mY0Ol00uf5TD6nDTCpk8sKV5W6XidN1/9CbW4OYot1n22/TpOIIIuxjgKUPjUksFHTCwj2y0Bjw0ZCwXM+tgNg7YBbxmC93YrYZHEf+o9efd9rnpd0sIjQWlaSwIhjtiY6Yt0qHKNSrVX37zuT/V5V75zZW7X41W3jo9lLNDFAPIjuakq5sWFseJIt5apYVVYq1EvMB+QKLwDlQeTgc6Q9nA5SYvbkqIjQBkcEp1x5b00EF2ntQkNDrRdYaafYGMHdS7OjmHqcidwqoNmyRDhDdXzU1LquOK4EbaG01eoC1YIIgdkJJ3FA1bLMufDaHN7OkYEpqIi+QChLyZkZZEZtlXAFayE5EA7jOGocv8gqbXyZyp2TEice0Nc0HjQdgpfaZzS7zHPir/351M++y0zrTmPiDvbcf6zKb0SI7fwLkgnO5Ds+uKc77bOvIqQ+tvA7qfVvr3ZpwX4BAAD//zODemsAAAAGSURBVAMALPXjJdHevrsAAAAASUVORK5CYII=",
   "enemy2": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAB3UlEQVR4AVxSwZGjMBDsUSreiwCIAvw6+2mnYREB3jBu/YR9GaIAZ+Bc5rolKLZWNcNIre7WIAgw/BqWID1jG33ftH26zozMAFJsBVTMXBCTGyQoUhJBnmAfjpAWclhzla2wI95aQfipNXGBZJkMnBRzomtyifPp7O/3G0rNxTY9JBSPVRF2Z0d2dpzOJ6+PNeq6QXNkNg1ONHQpeM5mxOn6CtxIpmxF4qY5oiorZsksUBQljerUldGFQcX2CmklL6RTjjytomBeFizK+cU6oyRWNzX+nk+eWzUW2zpwtLF1pz0fUIWDw3C5XgBDHukdjdzobbx5vEUPbYweW4pJsZW51cv1iq/HF3sVYmTkkHd3v9udGbpPTTq7d525Oy08s8h/PP7B0uVkKHfl+CRXiDrlj0SmNCzDMNg4TpiXOV1eWVQoqhJlVaR7mMYR3/1ApuQs1AX2x5UWTM5kMj0nCl6YX7zImbm8ME4T+u/eqMmNkKsI7FmVqS19YUc/9DY+Ryin6YlpfKLve/3l5DHSZbIyApPhu09uhCaDfXwccDj8oVht01xC7fOu1LmZ8TM6OLi5WaS1IF4Wb1l8ZRKoee7nNREaBS0kp4ShXSKMxOUJRJC8ibm+iDDOsY7/AAAA//96mfsFAAAABklEQVQDAC4O1Zj+irRFAAAAAElFTkSuQmCC",
-  "enemy3": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAB00lEQVR4ATSTy3HjMBBEe5CKtBGss/DeSJ6sjQVAJt4q7YnUyXZ849dDGcXBfLrnA0Bqeq4o7d2Cg1rXLbdtSwWOQ1YW24iwKcDOZ1/KU5GwLWsqEj+1rYsNpfc8yaXwW5EwXO0UO5bQHEMdUbGpBeFMxzYF1WSDaAKWnaKju5/zRCV7Co7yJIS5JAfSZIekwhzB96i9d4ZzINXnlFcYw8hwQlRKgyXikl3i20Z3vIjQ/X5H/p8w+MJdBJg8VRWRmgyTqJ+FPQcd0W9/33S73UA8xVDE2dXNnvlqZQSc50eeShyjE5+ytgrACgW7P+uWpkN4f/+XRhx0n0hcV0+oBAObkKyLK1hMxBFkUwZW3j4h4kgKjT405xAjSPgiYV14DXNo7CZNVDf48fllVUnyqrj0+udVEXQjNvsQw8rcxLc0KbSs3Dzz1eXJK2VQJIbCAR6LCJ3n6Pj8LvxaQFxiCp7GGDVp6OxWThaXYhiBDYajmgSbemICwc0666TI4MyjT2Cp0+33y4uCubsxpPOjsgQ1CYtXkI7HI/bjQPaS49jDhXyBY3YNCj2M73sc+xHG98dRo7agV1lUxGQc/guc73K56no95XL9pbp9n8JnMJc7s/sNAAD//zw5EYUAAAAGSURBVAMAyFXjwIHbI0MAAAAASUVORK5CYII="
+  "enemy3": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAB00lEQVR4ATSTy3HjMBBEe5CKtBGss/DeSJ6sjQVAJt4q7YnUyXZ849dDGcXBfLrnA0Bqeq4o7d2Cg1rXLbdtSwWOQ1YW24iwKcDOZ1/KU5GwLWsqEj+1rYsNpfc8yaXwW5EwXO0UO5bQHEMdUbGpBeFMxzYF1WSDaAKWnaKju5/zRCV7Co7yJIS5JAfSZIekwhzB96i9d4ZzINXnlFcYw8hwQlRKgyXikl3i20Z3vIjQ/X5H/p8w+MJdBJg8VRWRmgyTqJ+FPQcd0W9/33S73UA8xVDE2dXNnvlqZQSc50eeShyjE5+ytgrACgW7P+uWpkN4f/+XRhx0n0hcV0+oBAObkKyLK1hMxBFkUwZW3j4h4kgKjT405xAjSPgiYV14DXNo7CZNVDf48fllVUnyqrj0+udVEXQjNvsQw8rcxLc0KbSs3Dzz1eXJK2VQJIbCAR6LCJ3n6Pj8LvxaQFxiCp7GGDVp6OxWThaXYhiBDYajmgSbemICwc0666TI4MyjT2Cp0+33y4uCubsxpPOjsgQ1CYtXkI7HI/bjQPaS49jDhXyBY3YNCj2M73sc+xHG98dRo7agV1lUxGQc/guc73K56no95XL9pbp9n8JnMJc7s/sNAAD//zw5EYUAAAAGSURBVAMAyFXjwIHbI0MAAAAASUVORK5CYII=",
+  "skull": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAOCAYAAADwikbvAAAAAXNSR0IArs4c6QAAAORJREFUOE+FU1sOwzAIw9z/zPFkE0KbaVq+iAp+kSL2QUQwEAGqiPhZzyd1e2yRTCT+DZOLyIQINBkkiwvw/ZwjZBQ9e4t5S23UtchGEapqAR915auYu5BnrmXrPrJv+IJ4KjNge+7AZrg5ByUT0njEvj2KTJKzvKuuAYQtOZOyKZTvYdJNDmbLzn0/sndMr8DavBi99UxUfW2iPI7njk2eJbuZ3YHELfs1LDCtwn47lXpzezH1Hix9ZFcwzTAv7PlCB0IKtD8FWYEhQg/D99P35JyEl1NPz12BXQNH8Az3z6NVfQApnbEXcp/CmwAAAABJRU5ErkJggg==",
 };
 
 async function loadTextureDictionary(atlas = ASSET_ATLAS) {
@@ -119,6 +120,24 @@ const calcAngularPosition = (posX, posY, angle, distance) => {
     return [posX + (distance * Math.cos(toRadians(angle))), posY + (distance * Math.sin(toRadians(angle)))];
 }
 
+// Text Styling Copied from Resenfor game.
+
+const style = new PIXI.TextStyle({
+    fontFamily: 'Ubuntu',
+    fontSize: 24,
+    fill: 'white',
+    stroke: '#000000',
+    strokeThickness: 4,
+});
+
+const styleTitle = new PIXI.TextStyle({
+    fontFamily: 'Ubuntu',
+    fontSize: 32,
+    fill: 'white',
+    stroke: '#000000',
+    strokeThickness: 4,
+});
+
 const BULLET_SIZE = 9;
 const MOVE_CHECK_ATTEMPTS = 5;
 const PLAYER_INVS_DURA = 500;
@@ -147,6 +166,54 @@ playerObj.angle = 90;
 playerObj.x = 25;
 playerObj.y = app.screen.height / 2;
 app.stage.addChild(playerObj);
+
+// Player Lose Screen
+let pIsDead = false;
+
+const gameOverText = new PIXI.Text('Game Over!', styleTitle);
+gameOverText.x = (app.screen.width / 2) - (gameOverText.width / 2);
+gameOverText.y = (app.screen.height / 2) + 20;
+gameOverText.zIndex = 100000;
+app.stage.addChild(gameOverText);
+gameOverText.visible = false;
+
+const gameOverSkull = new PIXI.Sprite(textureDict["skull"]);
+gameOverSkull.anchor.set(0.5);
+gameOverSkull.x = (app.screen.width / 2) - (gameOverSkull.width / 2);
+gameOverSkull.y = (app.screen.height / 2) - (gameOverSkull.height / 2) - 10;
+gameOverSkull.scale.set(8,8);
+app.stage.addChild(gameOverSkull);
+gameOverSkull.visible = false;
+
+function showDeathScreen() {
+    gameOverText.visible = true
+    gameOverSkull.visible = true
+    // TODO destroy the enemies and player. prep for restart too.
+    let removeList = [];
+
+    for(const [key, value] of Object.entries(enemyDict)) {
+        const obj = value["object"];
+        removeList.push(key);
+        app.stage.removeChild(obj);
+    }
+    
+    for(const [key, value] of Object.entries(projDict)) {
+        const obj = value["object"];
+        removeList.push(key);
+        app.stage.removeChild(obj);
+    }
+
+    if(removeList.length != 0) {
+        for(const key of removeList) {
+            delete enemyDict[key];
+        }
+    }
+}
+
+function hideDeathScreen() {
+    gameOverText.visible = false
+    gameOverSkull.visible = false
+}
 
 function spawnEnemy(x, y, enemyType, strengthLevel, rotation=0) {
     let textureName = "enemy1";
